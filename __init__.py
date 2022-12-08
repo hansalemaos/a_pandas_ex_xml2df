@@ -16,9 +16,7 @@ from lxml import etree
 from nestednop import NestedNop
 from xml.etree import ElementTree
 from a_pandas_ex_horizontal_explode import pd_add_horizontal_explode
-from PrettyColorPrinter import add_printer
 
-add_printer(True)
 pd_add_horizontal_explode()
 pd_add_explode_tools()
 
@@ -106,7 +104,7 @@ def get_xpath_and_snippet(dframe):
     dfia = dfia.drop(columns="aa_snippet").rename(
         columns={"aa_snippet_0": "aa_xpath", "aa_snippet_1": "aa_snippet"}
     )
-    return dfia
+    return dfia.drop(columns=["aa_file"])
 
 
 def load_string(xmlfileorstring):
@@ -148,13 +146,16 @@ def xml_to_dict(file_string_url):
 def xml_to_df(file_string_url, add_xpath_and_snippet=False):
     vara = pd.Q_AnyNestedIterable_2df(xml_to_dict(file_string_url)).d_stack()
     if add_xpath_and_snippet:
-        xmlfileorstring = load_string(file_string_url)
-        temp, tempre = get_tmpfile(suffix=".xml")
-        with open(temp, "w") as fd:
-            xmlfileorstring.seek(0)
-            shutil.copyfileobj(xmlfileorstring, fd)
+        if os.path.exists(file_string_url):
+            vara["aa_file"] = file_string_url
+        else:
+            xmlfileorstring = load_string(file_string_url)
+            temp, tempre = get_tmpfile(suffix=".xml")
+            with open(temp, "w") as fd:
+                xmlfileorstring.seek(0)
+                shutil.copyfileobj(xmlfileorstring, fd)
 
-        vara["aa_file"] = temp
+            vara["aa_file"] = temp
         vara = get_xpath_and_snippet(dframe=vara)
     return vara
 
