@@ -1,8 +1,11 @@
 import itertools
 import operator
 import os
+import shutil
+import tempfile
 from ast import literal_eval
 import io
+from functools import partial
 
 import bs4
 import regex
@@ -13,7 +16,9 @@ from lxml import etree
 from nestednop import NestedNop
 from xml.etree import ElementTree
 from a_pandas_ex_horizontal_explode import pd_add_horizontal_explode
+from PrettyColorPrinter import add_printer
 
+add_printer(True)
 pd_add_horizontal_explode()
 pd_add_explode_tools()
 
@@ -53,7 +58,7 @@ class XmlDictConfig(dict):
                 self.update({key: aDict[key]})
 
 
-def get_xpath_and_snippet(filepath, dframe):
+def get_xpath_and_snippet(dframe):
     def get_xml_snippet(doc, itemtocrawl, configlines):
         alli = list(
             reversed(
@@ -81,11 +86,12 @@ def get_xpath_and_snippet(filepath, dframe):
 
     allsni = []
     dafa = dframe.copy()
-    dafa["aa_file"] = filepath
-    for name, group in dafa.groupby(dafa.aa_file):
+    for name, group in dafa.groupby("aa_file"):
         if regex.search(r"\.xml$", name, flags=regex.I) is None:
             continue
-        config = load_string(name)
+        with open(name, mode="rb") as f:
+            config = f.read()
+        config = config.decode("utf-8", "ignore")
         config = bs4.BeautifulSoup(config, features="xml").prettify()
         configlines = config.splitlines()
         doc = etree.XML(config.encode())
@@ -114,6 +120,14 @@ def load_string(xmlfileorstring):
     return xmlfileorstring
 
 
+def get_tmpfile(suffix=".bin"):
+    tfp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+    filename = tfp.name
+    filename = filename.replace("/", os.sep).replace("\\", os.sep)
+    tfp.close()
+    return filename, partial(os.remove, tfp.name)
+
+
 def xml_to_dict(file_string_url):
     xmlfileorstring = load_string(file_string_url)
 
@@ -134,10 +148,16 @@ def xml_to_dict(file_string_url):
 def xml_to_df(file_string_url, add_xpath_and_snippet=False):
     vara = pd.Q_AnyNestedIterable_2df(xml_to_dict(file_string_url)).d_stack()
     if add_xpath_and_snippet:
-        vara = get_xpath_and_snippet(filepath=file_string_url, dframe=vara)
+        xmlfileorstring = load_string(file_string_url)
+        temp, tempre = get_tmpfile(suffix=".xml")
+        with open(temp, "w") as fd:
+            xmlfileorstring.seek(0)
+            shutil.copyfileobj(xmlfileorstring, fd)
+
+        vara["aa_file"] = temp
+        vara = get_xpath_and_snippet(dframe=vara)
     return vara
 
 
 def pd_add_read_xml_files():
     pd.Q_Xml2df = xml_to_df
-
