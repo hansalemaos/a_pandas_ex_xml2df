@@ -1,6 +1,23 @@
 ```python
 #as dataframe
 #pip install a-pandas-ex-xml2df
+
+#### UPDATE 08.12.2022 - xpath / snippets 
+
+from a_pandas_ex_xml2df import pd_add_read_xml_files, xml_to_dict, xml_to_df
+import pandas as pd
+pd_add_read_xml_files()
+df=pd.Q_Xml2df('https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml',add_xpath_and_snippet=True)
+print(df[1:6].to_string())
+                                aa_all_keys                                        aa_value                                                                                                           aa_file                          aa_xpath                                                              aa_snippet
+1  (artist, 0, album, 0, description, link)  http://en.wikipedia.org/wiki/The_King_of_Limbs  https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml  //artist[1]/album[1]/description     <description link="http://en.wikipedia.org/wiki/The_King_of_Limbs">
+2    (artist, 0, album, 0, song, 0, length)                                            5:15  https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml      //artist[1]/album[1]/song[1]                                     <song length="5:15" title="Bloom"/>
+3     (artist, 0, album, 0, song, 0, title)                                           Bloom  https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml      //artist[1]/album[1]/song[1]                                     <song length="5:15" title="Bloom"/>
+4    (artist, 0, album, 0, song, 1, length)                                            4:41  https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml      //artist[1]/album[1]/song[2]                         <song length="4:41" title="Morning Mr Magpie"/>
+5     (artist, 0, album, 0, song, 1, title)                               Morning Mr Magpie  https://gist.githubusercontent.com/jasonbaldridge/2597611/raw/c2c6a072c7d018c35aefad6b4739ac75247e5d92/music.xml      //artist[1]/album[1]/song[2]                         <song length="4:41" title="Morning Mr Magpie"/>
+
+ 
+
 from a_pandas_ex_xml2df import pd_add_read_xml_files, xml_to_dict, xml_to_df
 import pandas as pd
 pd_add_read_xml_files()
